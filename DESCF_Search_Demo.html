@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="bn">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DESCF পোর্টফলিও | নাম দিয়ে খোঁজা</title>
+<style>
+body { max-width: 42rem; margin: 3rem auto; padding: 0 1rem; font: 1.1rem/1.65 system-ui, sans-serif; color: #18342b; background: #f6faf7; }
+label { display: block; font-weight: bold; }
+input { box-sizing: border-box; width: 100%; padding: .7rem; font: inherit; border: 1px solid #365d4d; border-radius: .35rem; }
+li { margin-block: .5rem; }
+</style>
+<main>
+<h1>নাম দিয়ে প্রজাতি খোঁজা</h1>
+<p>পোর্টফলিও ডেমো। সব নাম কাল্পনিক। বাস্তব সাপ শনাক্ত করতে এই তালিকা ব্যবহার করবেন না।</p>
+<label for="query">বাংলা, স্থানীয়, ইংরেজি বা বৈজ্ঞানিক নাম</label>
+<input id="query" type="search" aria-describedby="examples">
+<p id="examples">চেষ্টা করুন: নদীডোরা, নদী ডোরা, ডোরা, River Stripe অথবা Exemplaris fluvius।</p>
+<p id="status" role="status"></p>
+<ul id="results"></ul>
+</main>
+<script>
+const records = [
+  { bangla: 'নদীডোরা', english: 'River Stripe', scientific: 'Exemplaris fluvius', aliases: ['নদী ডোরা', 'ডোরা'] },
+  { bangla: 'বনডোরা', english: 'Forest Stripe', scientific: 'Exemplaris silva', aliases: ['বন ডোরা', 'ডোরা'] }
+];
+
+function normalize(value) {
+  return value.normalize('NFC').toLowerCase().trim().replace(/\s+/gu, ' ');
+}
+
+function search(query) {
+  const term = normalize(query);
+  return records.filter(({ bangla, english, scientific, aliases }) =>
+    [bangla, english, scientific, ...aliases].some(name => normalize(name).includes(term))
+  );
+}
+
+const input = document.querySelector('#query');
+const status = document.querySelector('#status');
+const results = document.querySelector('#results');
+
+function render() {
+  const matches = search(input.value);
+  status.textContent = matches.length
+    ? new Intl.NumberFormat('bn-BD').format(matches.length) + 'টি ফল'
+    : 'কোনো ফল পাওয়া যায়নি। অন্য নাম বা বানান দিয়ে চেষ্টা করুন।';
+  results.replaceChildren(...matches.map(record => {
+    const item = document.createElement('li');
+    item.textContent = record.bangla + ' · ' + record.english + ' · ' + record.scientific;
+    return item;
+  }));
+}
+
+input.addEventListener('input', render);
+render();
+</script>
+</html>
