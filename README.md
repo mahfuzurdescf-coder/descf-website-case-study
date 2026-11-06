@@ -21,13 +21,13 @@ People arrive with different needs: to learn about a snake, understand a conserv
 
 ## Selected technical work
 
-The web application uses **Next.js 14, TypeScript, React, Tailwind CSS, Sanity CMS, and GROQ**. These public source examples show how the pieces fit together:
+The web application uses **Next.js 14, TypeScript, React, Tailwind CSS, Sanity CMS, and GROQ**. The following self-contained examples illustrate two of the engineering patterns behind the experience:
 
-- [Species browsing component](https://github.com/mahfuzurdescf-coder/Latest/blob/main/apps/web/components/wildlife/SnakeSpeciesBrowser.tsx) — search and filtering interface for species records.
-- [Snake guide route](https://github.com/mahfuzurdescf-coder/Latest/blob/main/apps/web/app/bangladesh-wildlife/snakes/page.tsx) — the public guide page and its content model.
-- [Programme detail route](https://github.com/mahfuzurdescf-coder/Latest/blob/main/apps/web/app/programmes/%5Bslug%5D/page.tsx) — reusable pages driven by structured programme content.
+- [Multilingual name matching](./examples/species-name-search.mjs) — pure search logic for Bangla, English, romanised aliases, and scientific names, with [automated examples](./examples/species-name-search.test.mjs).
+- [Structured programme content](./examples/programme-content-pattern.ts) — a typed, reusable page-data pattern with a parameterised GROQ query.
 
 The [species-name explorer](./DESCF_Search_Demo.html) is a standalone interaction illustrating searches across writing systems, aliases, and scientific names. **Its sample records are fictional and must not be used for species identification.**
+The code examples are illustrative and do not connect to DESCF's live database.
 
 ## My role and collaborators
 
