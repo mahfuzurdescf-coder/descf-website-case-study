@@ -1,57 +1,198 @@
 <!doctype html>
 <html lang="bn">
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>নাম দিয়ে প্রজাতি খোঁজা | DESCF</title>
-<style>
-body { max-width: 42rem; margin: 3rem auto; padding: 0 1rem; font: 1.1rem/1.65 system-ui, sans-serif; color: #18342b; background: #f6faf7; }
-label { display: block; font-weight: bold; }
-input { box-sizing: border-box; width: 100%; padding: .7rem; font: inherit; border: 1px solid #365d4d; border-radius: .35rem; }
-li { margin-block: .5rem; }
-</style>
-<main>
-<h1>নাম দিয়ে প্রজাতি খোঁজা</h1>
-<p>পোর্টফলিও ডেমো। সব নাম কাল্পনিক। বাস্তব সাপ শনাক্ত করতে এই তালিকা ব্যবহার করবেন না।</p>
-<label for="query">বাংলা, স্থানীয়, ইংরেজি বা বৈজ্ঞানিক নাম</label>
-<input id="query" type="search" aria-describedby="examples">
-<p id="examples">চেষ্টা করুন: নদীডোরা, নদী ডোরা, ডোরা, River Stripe অথবা Exemplaris fluvius।</p>
-<p id="status" role="status"></p>
-<ul id="results"></ul>
-</main>
-<script>
-const records = [
-  { bangla: 'নদীডোরা', english: 'River Stripe', scientific: 'Exemplaris fluvius', aliases: ['নদী ডোরা', 'ডোরা'] },
-  { bangla: 'বনডোরা', english: 'Forest Stripe', scientific: 'Exemplaris silva', aliases: ['বন ডোরা', 'ডোরা'] }
-];
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#12382d">
+  <meta name="description" content="বাংলা, ইংরেজি ও বৈজ্ঞানিক নামের ভিত্তিতে খোঁজার একটি ইন্টার‍্যাকটিভ উদাহরণ।">
+  <title>প্রজাতির নাম অনুসন্ধান · DESCF</title>
+  <style>
+    :root { color-scheme:light; --green:#143b30; --forest:#23624a; --pale:#eaf3e5; --ink:#18362e; --muted:#5d7168; --line:#dbe5db; --bg:#f7f8f3; }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); background:var(--bg); font:16px/1.65 system-ui,"Noto Sans Bengali","Hind Siliguri",sans-serif; }
+    a { color:inherit; text-underline-offset:4px; }
+    button,input { font:inherit; }
+    button { cursor:pointer; }
+    :is(a,button,input):focus-visible { outline:3px solid #88bd53; outline-offset:3px; }
+    .wrap { width:min(1120px,calc(100% - 2.5rem)); margin:auto; }
+    .header { background:var(--green); color:white; }
+    .nav { min-height:72px; display:flex; gap:1rem; align-items:center; justify-content:space-between; }
+    .brand { font-weight:800; letter-spacing:.035em; text-decoration:none; }
+    .back { font-size:.9rem; text-decoration:none; color:#dbedd8; }
+    .hero { padding:5rem 0 3.6rem; background:var(--green); color:white; border-top:1px solid #ffffff22; }
+    .hero-layout { display:grid; grid-template-columns:1.15fr .85fr; gap:4rem; align-items:end; }
+    .kicker { color:#bce28b; text-transform:uppercase; letter-spacing:.15em; font-size:.74rem; font-weight:800; }
+    h1 { margin:.8rem 0 1.1rem; font-size:clamp(2.4rem,5vw,4.8rem); line-height:1.15; letter-spacing:-.04em; }
+    .hero p { color:#d2e6da; margin:0; font-size:1.04rem; max-width:40rem; }
+    .hero-note { border-left:2px solid #8abf7d; padding-left:1.2rem; font-size:.92rem; color:#d8e8d9; }
+    .workspace { padding:2.8rem 0 5rem; }
+    .search-panel { padding:1.7rem; background:white; border:1px solid var(--line); border-radius:16px; box-shadow:0 13px 35px #143b300b; }
+    .search-top { display:flex; align-items:baseline; justify-content:space-between; gap:.8rem; flex-wrap:wrap; }
+    label { display:block; font-weight:800; margin-bottom:.6rem; }
+    .hint { color:var(--muted); font-size:.9rem; }
+    .input-wrap { position:relative; display:flex; align-items:center; }
+    .input-icon { position:absolute; left:1rem; font-size:1.4rem; color:#517d66; pointer-events:none; }
+    input { width:100%; min-height:60px; border:1.5px solid #94b09d; border-radius:10px; padding:.8rem 5rem .8rem 3rem; font-size:1.04rem; color:var(--ink); background:#fdfefb; }
+    input::placeholder { color:#718b7e; opacity:1; }
+    .clear { position:absolute; right:.55rem; border:none; background:#eaf1e9; color:#214c3b; border-radius:8px; padding:.45rem .75rem; font-size:.85rem; }
+    .suggestions { display:flex; flex-wrap:wrap; align-items:center; gap:.55rem; margin-top:1.2rem; }
+    .suggestions span { font-size:.84rem; color:var(--muted); margin-right:.2rem; }
+    .chip { border:1px solid #bcd4bc; color:#22533e; border-radius:999px; padding:.38rem .75rem; background:#f3f8f0; font-size:.88rem; }
+    .chip:hover { background:#deedda; }
+    .results-head { margin:2.5rem 0 1rem; display:flex; flex-wrap:wrap; justify-content:space-between; align-items:end; gap:1rem; }
+    h2 { margin:0; letter-spacing:-.03em; font-size:1.65rem; }
+    #status { margin:0; color:var(--muted); font-size:.95rem; }
+    .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; padding:0; margin:0; list-style:none; }
+    .card { min-width:0; padding:1.4rem; background:#fff; border:1px solid var(--line); border-radius:13px; }
+    .card-top { display:flex; justify-content:space-between; align-items:start; gap:1rem; }
+    .specimen { font-size:.68rem; letter-spacing:.1em; font-weight:800; text-transform:uppercase; color:#387451; }
+    h3 { margin:.35rem 0 .1rem; font-size:1.5rem; line-height:1.3; }
+    .english { color:#456d58; font-weight:700; }
+    .mark { width:46px; height:46px; flex:none; display:grid; place-items:center; border-radius:13px; color:white; background:linear-gradient(145deg,#71a16d,#245b45); font-size:1.45rem; }
+    .scientific { padding:1rem 0; margin:.8rem 0; border-bottom:1px solid var(--line); color:#4d6b5c; font-size:.96rem; }
+    .aliases { color:var(--muted); font-size:.9rem; margin:0; overflow-wrap:anywhere; }
+    .aliases strong { color:#395d4b; }
+    .empty { grid-column:1/-1; padding:3rem 1.3rem; text-align:center; border:1px dashed #96b49b; border-radius:12px; background:#eff6ec; }
+    .empty strong { display:block; font-size:1.1rem; }
+    .empty p { color:var(--muted); margin:.4rem 0 0; }
+    .notice { margin-top:2.5rem; padding:1rem 1.2rem; background:#e8f0e6; border-left:3px solid #588b62; border-radius:0 8px 8px 0; color:#3f6251; font-size:.9rem; }
+    footer { padding:1.4rem 0 2rem; color:var(--muted); border-top:1px solid var(--line); font-size:.9rem; }
+    @media(max-width:850px) { .hero-layout { grid-template-columns:1fr; gap:1.8rem; } .hero { padding:3.5rem 0; } .hero-note { max-width:35rem; } }
+    @media(max-width:620px) { .wrap { width:min(100% - 2rem,1120px); } .grid { grid-template-columns:1fr; } .search-panel { padding:1.1rem; } h1 { font-size:2.8rem; } .hero { padding:2.6rem 0; } .back { font-size:.8rem; } }
+    @media(prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto; } }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="wrap nav">
+      <a class="brand" href="https://www.descf.org/">DESCF</a>
+      <a class="back" href="./index.html">কেস স্টাডি দেখুন ↗</a>
+    </div>
+  </header>
+  <main>
+    <section class="hero">
+      <div class="wrap hero-layout">
+        <div>
+          <div class="kicker">Species-name explorer</div>
+          <h1>একই প্রজাতি, অনেক নামে পরিচিত।</h1>
+          <p>বাংলা, স্থানীয়, ইংরেজি, রোমান হরফে লেখা নাম কিংবা বৈজ্ঞানিক নাম—যে নামটি জানা আছে, সেটি দিয়েই অনুসন্ধান করুন।</p>
+        </div>
+        <div class="hero-note">নাম ও বানানের ভিন্নতার মধ্যেও তথ্য খুঁজে পাওয়ার জন্য তৈরি একটি ইন্টার‍্যাকটিভ উদাহরণ। এখানে ব্যবহৃত সব প্রজাতির নাম কাল্পনিক।</div>
+      </div>
+    </section>
+    <section class="workspace">
+      <div class="wrap">
+        <div class="search-panel">
+          <div class="search-top"><label for="query">প্রজাতির নাম লিখুন</label><span class="hint">বাংলা বা ইংরেজি — দুটিই চলবে</span></div>
+          <div class="input-wrap">
+            <span class="input-icon" aria-hidden="true">⌕</span>
+            <input type="search" id="query" autocomplete="off" spellcheck="false" placeholder="যেমন: নদী ডোরা, Nodi Dora, Exemplaris..." aria-describedby="search-help">
+            <button class="clear" id="clear" type="button" hidden>মুছুন</button>
+          </div>
+          <div class="suggestions" id="search-help">
+            <span>খুঁজে দেখুন:</span>
+            <button class="chip" type="button" data-query="নদী ডোরা">নদী ডোরা</button>
+            <button class="chip" type="button" data-query="dora">dora</button>
+            <button class="chip" type="button" data-query="River Stripe">River Stripe</button>
+            <button class="chip" type="button" data-query="Exemplaris montana">Exemplaris montana</button>
+            <button class="chip" type="button" data-query="অজানা">অজানা</button>
+          </div>
+        </div>
+        <div class="results-head">
+          <h2>নামের মিল</h2>
+          <p id="status" role="status" aria-live="polite" aria-atomic="true"></p>
+        </div>
+        <ul id="results" class="grid" aria-label="অনুসন্ধানের ফলাফল"></ul>
+        <aside class="notice"><strong>তথ্যসংক্রান্ত সতর্কতা:</strong> সব নাম ও বৈজ্ঞানিক নাম কাল্পনিক। এই উদাহরণ বাস্তব সাপ বা অন্য বন্যপ্রাণী শনাক্তকরণ, নিরাপত্তা সিদ্ধান্ত কিংবা চিকিৎসা পরামর্শের জন্য নয়। বাস্তবে বন্যপ্রাণী দেখলে নিরাপদ দূরত্ব বজায় রাখুন।</aside>
+      </div>
+    </section>
+  </main>
+  <footer><div class="wrap">DESCF ওয়েবসাইটের পরিকল্পনা, ডিজাইন ও ডেভেলপমেন্ট: Mahfuzur Rahman · <a href="https://www.descf.org/bangladesh-wildlife/snakes">মূল প্রজাতি গাইড দেখুন</a></div></footer>
+  <script>
+    "use strict";
+    const species = [
+      { bangla:"নদীডোরা", english:"River Stripe", scientific:"Exemplaris fluvius", aliases:["নদী ডোরা","নদি ডোরা","ডোরা","Nodi Dora","Nodi-dora","river striped"] },
+      { bangla:"বনডোরা", english:"Forest Stripe", scientific:"Exemplaris silvatica", aliases:["বন ডোরা","ডোরা","Bon Dora","Bon-dora","forest striped"] },
+      { bangla:"পাহাড়রেখা", english:"Hill Line", scientific:"Exemplaris montana", aliases:["পাহাড় রেখা","পাহাড় রেখা","Pahar Rekha","Hillline"] },
+      { bangla:"জলছায়া", english:"Water Shade", scientific:"Exemplaris aquatica", aliases:["জল ছায়া","জল ছায়া","Jol Chhaya","water shadow"] }
+    ];
 
-function normalize(value) {
-  return value.normalize('NFC').toLowerCase().trim().replace(/\s+/gu, ' ');
-}
+    // Normalise case, Unicode form, word spacing and common separators.
+    function normalise(value) {
+      return value.normalize("NFKC").toLocaleLowerCase().replace(/[\s\-_.।,]+/gu,"").trim();
+    }
+    function findSpecies(value) {
+      const term = normalise(value);
+      if (!term) return species;
+      return species.filter(item =>
+        [item.bangla,item.english,item.scientific,...item.aliases]
+          .some(name => normalise(name).includes(term))
+      );
+    }
+    const input = document.getElementById("query");
+    const clear = document.getElementById("clear");
+    const results = document.getElementById("results");
+    const status = document.getElementById("status");
+    const formatCount = count => new Intl.NumberFormat("bn-BD").format(count);
 
-function search(query) {
-  const term = normalize(query);
-  return records.filter(({ bangla, english, scientific, aliases }) =>
-    [bangla, english, scientific, ...aliases].some(name => normalize(name).includes(term))
-  );
-}
-
-const input = document.querySelector('#query');
-const status = document.querySelector('#status');
-const results = document.querySelector('#results');
-
-function render() {
-  const matches = search(input.value);
-  status.textContent = matches.length
-    ? new Intl.NumberFormat('bn-BD').format(matches.length) + 'টি ফল'
-    : 'কোনো ফল পাওয়া যায়নি। অন্য নাম বা বানান দিয়ে চেষ্টা করুন।';
-  results.replaceChildren(...matches.map(record => {
-    const item = document.createElement('li');
-    item.textContent = record.bangla + ' · ' + record.english + ' · ' + record.scientific;
-    return item;
-  }));
-}
-
-input.addEventListener('input', render);
-render();
-</script>
+    function cardFor(item) {
+      const li = document.createElement("li");
+      li.className = "card";
+      const top = document.createElement("div");
+      top.className = "card-top";
+      const detail = document.createElement("div");
+      const label = document.createElement("span");
+      label.className = "specimen";
+      label.textContent = "নামের উদাহরণ";
+      const name = document.createElement("h3");
+      name.textContent = item.bangla;
+      const english = document.createElement("div");
+      english.className = "english";
+      english.textContent = item.english;
+      detail.append(label,name,english);
+      const mark = document.createElement("span");
+      mark.className = "mark";
+      mark.setAttribute("aria-hidden","true");
+      mark.textContent = "✳";
+      top.append(detail,mark);
+      const scientific = document.createElement("div");
+      scientific.className = "scientific";
+      const italics = document.createElement("i");
+      italics.textContent = item.scientific;
+      scientific.append(italics);
+      const aliases = document.createElement("p");
+      aliases.className = "aliases";
+      const strong = document.createElement("strong");
+      strong.textContent = "অন্য নাম: ";
+      aliases.append(strong,document.createTextNode(item.aliases.join(" · ")));
+      li.append(top,scientific,aliases);
+      return li;
+    }
+    function render() {
+      const matches = findSpecies(input.value);
+      clear.hidden = input.value.length === 0;
+      status.textContent = matches.length
+        ? formatCount(matches.length) + "টি নামের মিল পাওয়া গেছে"
+        : "কোনো মিল পাওয়া যায়নি";
+      if (matches.length) {
+        results.replaceChildren(...matches.map(cardFor));
+      } else {
+        const empty = document.createElement("li");
+        empty.className = "empty";
+        const heading = document.createElement("strong");
+        heading.textContent = "এই নামে কোনো ফল পাওয়া যায়নি";
+        const guidance = document.createElement("p");
+        guidance.textContent = "অন্য বানান, স্থানীয় নাম বা বৈজ্ঞানিক নাম দিয়ে আবার চেষ্টা করুন।";
+        empty.append(heading,guidance);
+        results.replaceChildren(empty);
+      }
+    }
+    input.addEventListener("input",render);
+    clear.addEventListener("click",() => { input.value=""; render(); input.focus(); });
+    document.querySelectorAll("[data-query]").forEach(button => {
+      button.addEventListener("click",() => { input.value=button.dataset.query; render(); input.focus(); });
+    });
+    render();
+  </script>
+</body>
 </html>
