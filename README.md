@@ -19,6 +19,16 @@ People arrive with different needs: to learn about a snake, understand a conserv
 | Content architecture | Structured programme pages and reusable article/resource components connected to Sanity CMS |
 | Responsible communication | Safety-first wildlife guidance and care around sensitive species-location information |
 
+## Implementation architecture
+
+The working codebase follows a Turborepo structure: a **Next.js App Router** public site and a separate **Sanity Studio** for structured editorial content.
+
+- **Page architecture:** dynamic programme, newsroom, and event detail routes with reusable layouts and content sections.
+- **Wildlife browsing:** species-browser, distribution-map, and image-gallery components.
+- **Interface reliability:** shared forms, error boundaries, empty states, and a skip-navigation component.
+
+These are code-level implementation areas, not claims of measured performance or identification accuracy.
+
 ## Selected technical work
 
 The web application uses **Next.js 14, TypeScript, React, Tailwind CSS, Sanity CMS, and GROQ**. The following self-contained examples illustrate two of the engineering patterns behind the experience:
